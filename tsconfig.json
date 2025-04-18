@@ -18,5 +18,6 @@
     "strictBindCallApply": false,
     "noFallthroughCasesInSwitch": false,
     "importsNotUsedAsValues": "remove",
+    "typeRoots": ["./node_modules/@types", "./src/types"]
   }
 }
