@@ -1,5 +1,3 @@
-version: '3.7'
-
 services:
   db:
     container_name: postgres
@@ -10,27 +8,65 @@ services:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - POSTGRES_DB=${POSTGRES_DB}
     ports:
-      - 5400:5432
+      - ${POSTGRES_PORT}:5432
     volumes:
      - postgres_data:/var/lib/postgresql/data
     networks:
       - backend
+    profiles:
+      - dev
 
   redis_db:
     container_name: redis_db
     image: redis:7.2.6
     restart: always
     ports:
-      - 6000:6379
+      - ${REDIS_PORT}:6379
     command: redis-server --requirepass ${REDIS_PASSWORD}
     volumes:
      - redis_data:/data
     networks:
       - backend
+    profiles:
+      - dev
+
+  test_db:
+    container_name: test_postgres
+    image: postgres:17.4
+    restart: always
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+    ports:
+      - ${POSTGRES_PORT}:5432
+    volumes:
+      - test_postgres_data:/var/lib/postgresql/data
+    networks:
+      - test_backend
+    profiles:
+      - test
+
+  test_redis_db:
+    container_name: test_redis_db
+    image: redis:7.2.6
+    restart: always
+    ports:
+      - ${REDIS_PORT}:6379
+    command: redis-server --requirepass ${REDIS_PASSWORD}
+    volumes:
+     - test_redis_data:/data
+    networks:
+      - test_backend
+    profiles:
+      - test
 
 volumes:
   postgres_data:
   redis_data:
+  test_postgres_data:
+  test_redis_data:
 
 networks:
   backend:
+  test_backend:
