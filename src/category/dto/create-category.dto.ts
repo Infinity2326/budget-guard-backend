@@ -22,5 +22,5 @@ export class CreateCategory {
   @IsString()
   @IsOptional()
   @MaxLength(255)
-  description: string
+  description?: string
 }

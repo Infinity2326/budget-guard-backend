@@ -23,5 +23,5 @@ export class CreateTransaction {
 
   @IsString()
   @IsOptional()
-  description: string
+  description?: string
 }

@@ -14,14 +14,14 @@ export class UpdateCategory {
 
   @IsString()
   @IsOptional()
-  name: string
+  name?: string
 
   @IsString()
   @IsOptional()
   @IsEnum(CategoryType)
-  type: CategoryType
+  type?: CategoryType
 
   @IsString()
   @IsOptional()
-  description: string
+  description?: string
 }
