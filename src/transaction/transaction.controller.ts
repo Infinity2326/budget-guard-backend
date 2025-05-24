@@ -12,9 +12,15 @@ import {
   UseGuards,
 } from '@nestjs/common'
 import { TransactionService } from './transaction.service'
-import { ApiBearerAuth, ApiOkResponse, ApiTags } from '@nestjs/swagger'
+import {
+  ApiBearerAuth,
+  ApiCreatedResponse,
+  ApiNoContentResponse,
+  ApiOkResponse,
+  ApiTags,
+} from '@nestjs/swagger'
 import { SessionGuard } from '../token/guards/session.guard'
-import { UpdateTrascation } from './dto/update-transaction.dto'
+import { UpdateTransaction } from './dto/update-transaction.dto'
 import { CreateTransaction } from './dto/create-transaction.dto'
 import { Authorized } from '../decorators/authorized.decorator'
 import { GetTransactionsQueryDto } from './dto/get-transactions.query.dto'
@@ -25,11 +31,11 @@ export class TransactionController {
   constructor(private readonly transactionService: TransactionService) {}
 
   @Post()
-  @HttpCode(HttpStatus.OK)
-  @ApiOkResponse()
+  @HttpCode(HttpStatus.CREATED)
+  @ApiCreatedResponse()
   @ApiBearerAuth()
   @UseGuards(SessionGuard)
-  async createTrascation(
+  async createTransaction(
     @Authorized('sub') userId: string,
     @Body() dto: CreateTransaction,
   ) {
@@ -41,9 +47,9 @@ export class TransactionController {
   @ApiOkResponse()
   @ApiBearerAuth()
   @UseGuards(SessionGuard)
-  async updateTrascation(
+  async updateTransaction(
     @Authorized('sub') userId: string,
-    @Body() dto: UpdateTrascation,
+    @Body() dto: UpdateTransaction,
   ) {
     return await this.transactionService.updateTransaction(userId, dto)
   }
@@ -73,8 +79,8 @@ export class TransactionController {
   }
 
   @Delete(':id')
-  @HttpCode(HttpStatus.OK)
-  @ApiOkResponse()
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiNoContentResponse()
   @ApiBearerAuth()
   @UseGuards(SessionGuard)
   async deleteTransaction(

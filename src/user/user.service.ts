@@ -55,7 +55,11 @@ export class UserService {
       throw new NotFoundException()
     }
 
-    return this.prisma.user.update({ where: { id }, data })
+    return this.prisma.user.update({
+      where: { id },
+      data,
+      select: { id: true, email: true, name: true },
+    })
   }
 
   public async deleteUser(id: string) {
@@ -65,7 +69,9 @@ export class UserService {
       throw new NotFoundException()
     }
 
-    return this.prisma.user.delete({ where: { id } })
+    await this.deleteUserDependencies(user.id)
+
+    await this.prisma.user.delete({ where: { id } })
   }
 
   private async hashPassword(password: string) {
@@ -74,5 +80,19 @@ export class UserService {
     }
 
     return await hash(password)
+  }
+
+  private async deleteUserDependencies(userId: string) {
+    await this.prisma.transaction.deleteMany({
+      where: { userId },
+    })
+
+    await this.prisma.category.deleteMany({
+      where: { userId },
+    })
+
+    await this.prisma.token.deleteMany({
+      where: { userId },
+    })
   }
 }

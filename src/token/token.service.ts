@@ -10,14 +10,16 @@ import { TokenPayload } from '../types/auth'
 export class TokenService {
   private readonly ttl: number
   private readonly jwtSecret: string
+
   constructor(
     @Inject('REDIS') private readonly redis: IORedis,
     private readonly jwt: JwtService,
     private readonly config: ConfigService,
   ) {
     this.ttl =
-      this.config.get<number>('JWT_REFRESH_TOKEN_TTL') || 60 * 60 * 24 * 30 // 30 дней
-    this.config.getOrThrow('JWT_SECRET')
+      this.config.get<number>('REFRESH_TOKEN_TTL') || 1000 * 60 * 60 * 24 * 30
+
+    this.jwtSecret = this.config.getOrThrow('JWT_SECRET')
   }
 
   public getRedisKey(userId: string): string {
@@ -49,7 +51,10 @@ export class TokenService {
   }
 
   public async generateAccessToken(userId: string): Promise<string> {
-    const payload = { sub: userId }
+    const jti = randomUUID()
+
+    const payload = { sub: userId, jti }
+
     return this.jwt.signAsync(payload, {
       expiresIn: '15m',
       secret: this.jwtSecret,
@@ -67,6 +72,7 @@ export class TokenService {
 
   async deleteRefreshToken(userId: string): Promise<void> {
     const key = this.getRedisKey(userId)
+
     await this.redis.del(key)
   }
 

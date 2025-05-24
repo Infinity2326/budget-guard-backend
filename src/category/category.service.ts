@@ -19,6 +19,9 @@ export class CategoryService {
       },
       select: {
         id: true,
+        name: true,
+        type: true,
+        description: true,
       },
     })
   }
@@ -87,6 +90,6 @@ export class CategoryService {
       throw new NotFoundException('Category not found.')
     }
 
-    return this.prisma.category.delete({ where: { id, userId } })
+    await this.prisma.category.delete({ where: { id, userId } })
   }
 }

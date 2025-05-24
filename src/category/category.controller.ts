@@ -11,7 +11,13 @@ import {
   UseGuards,
 } from '@nestjs/common'
 import { CategoryService } from './category.service'
-import { ApiBearerAuth, ApiOkResponse, ApiTags } from '@nestjs/swagger'
+import {
+  ApiBearerAuth,
+  ApiCreatedResponse,
+  ApiNoContentResponse,
+  ApiOkResponse,
+  ApiTags,
+} from '@nestjs/swagger'
 import { Authorized } from '../decorators/authorized.decorator'
 import { SessionGuard } from '../token/guards/session.guard'
 import { CreateCategory } from './dto/create-category.dto'
@@ -23,11 +29,11 @@ export class CategoryController {
   constructor(private readonly categoryService: CategoryService) {}
 
   @Post()
-  @HttpCode(HttpStatus.OK)
-  @ApiOkResponse()
+  @HttpCode(HttpStatus.CREATED)
+  @ApiCreatedResponse()
   @ApiBearerAuth()
   @UseGuards(SessionGuard)
-  public async createTrascation(
+  public async createCategory(
     @Authorized('sub') userId: string,
     @Body() dto: CreateCategory,
   ) {
@@ -39,7 +45,7 @@ export class CategoryController {
   @ApiOkResponse()
   @ApiBearerAuth()
   @UseGuards(SessionGuard)
-  public async updateTrascation(
+  public async updateCategory(
     @Authorized('sub') userId: string,
     @Body() dto: UpdateCategory,
   ) {
@@ -68,8 +74,8 @@ export class CategoryController {
   }
 
   @Delete(':id')
-  @HttpCode(HttpStatus.OK)
-  @ApiOkResponse()
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiNoContentResponse()
   @ApiBearerAuth()
   @UseGuards(SessionGuard)
   async deleteCategory(

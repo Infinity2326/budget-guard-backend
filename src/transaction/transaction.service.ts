@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common'
 import { PrismaService } from '../prisma/prisma.service'
 import { CreateTransaction } from './dto/create-transaction.dto'
-import { UpdateTrascation } from './dto/update-transaction.dto'
+import { UpdateTransaction } from './dto/update-transaction.dto'
 import { Prisma } from '@prisma/client'
 import { GetTransactionsQueryDto } from './dto/get-transactions.query.dto'
 
@@ -48,7 +48,7 @@ export class TransactionService {
     })
   }
 
-  public async updateTransaction(userId: string, dto: UpdateTrascation) {
+  public async updateTransaction(userId: string, dto: UpdateTransaction) {
     const { id, ...data } = dto
 
     const exsisting = await this.prisma.transaction.findFirst({
@@ -134,12 +134,17 @@ export class TransactionService {
   public async getTransactionById(userId: string, id: string) {
     const transaction = await this.prisma.transaction.findFirst({
       where: { id, userId },
-      include: {
+      select: {
+        id: true,
+        amount: true,
+        date: true,
+        description: true,
         category: {
           select: {
             id: true,
             name: true,
             type: true,
+            description: true,
           },
         },
       },
@@ -161,6 +166,6 @@ export class TransactionService {
       throw new NotFoundException('Transaction not found')
     }
 
-    return this.prisma.transaction.delete({ where: { id, userId } })
+    await this.prisma.transaction.delete({ where: { id, userId } })
   }
 }
