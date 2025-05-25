@@ -69,8 +69,6 @@ export class UserService {
       throw new NotFoundException()
     }
 
-    await this.deleteUserDependencies(user.id)
-
     await this.prisma.user.delete({ where: { id } })
   }
 
@@ -80,19 +78,5 @@ export class UserService {
     }
 
     return await hash(password)
-  }
-
-  private async deleteUserDependencies(userId: string) {
-    await this.prisma.transaction.deleteMany({
-      where: { userId },
-    })
-
-    await this.prisma.category.deleteMany({
-      where: { userId },
-    })
-
-    await this.prisma.token.deleteMany({
-      where: { userId },
-    })
   }
 }
