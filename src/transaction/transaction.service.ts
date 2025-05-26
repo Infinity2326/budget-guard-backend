@@ -7,11 +7,26 @@ import { PrismaService } from '../prisma/prisma.service'
 import { CreateTransaction } from './dto/create-transaction.dto'
 import { UpdateTransaction } from './dto/update-transaction.dto'
 import { Prisma } from '@prisma/client'
-import { GetTransactionsQueryDto } from './dto/get-transactions.query.dto'
+import { GetTransactionsQuery } from './dto/get-transactions.query.dto'
 
 @Injectable()
 export class TransactionService {
   constructor(private readonly prisma: PrismaService) {}
+
+  transactionSelect = {
+    id: true,
+    amount: true,
+    date: true,
+    description: true,
+    category: {
+      select: {
+        id: true,
+        name: true,
+        type: true,
+        description: true,
+      },
+    },
+  }
 
   public async createTransaction(userId: string, data: CreateTransaction) {
     const exsisting = await this.prisma.category.findFirst({
@@ -31,20 +46,7 @@ export class TransactionService {
         ...data,
         userId,
       },
-      select: {
-        id: true,
-        amount: true,
-        date: true,
-        description: true,
-        category: {
-          select: {
-            id: true,
-            name: true,
-            type: true,
-            description: true,
-          },
-        },
-      },
+      select: this.transactionSelect,
     })
   }
 
@@ -79,24 +81,11 @@ export class TransactionService {
         id,
       },
       data,
-      select: {
-        id: true,
-        amount: true,
-        date: true,
-        description: true,
-        category: {
-          select: {
-            id: true,
-            name: true,
-            type: true,
-            description: true,
-          },
-        },
-      },
+      select: this.transactionSelect,
     })
   }
 
-  public async getTransactions(userId: string, query: GetTransactionsQueryDto) {
+  public async getTransactions(userId: string, query: GetTransactionsQuery) {
     const filters: Prisma.TransactionWhereInput = {
       userId,
     }
@@ -114,44 +103,18 @@ export class TransactionService {
       },
       skip: query.skip ?? 0,
       take: query.take ?? 50,
-      select: {
-        id: true,
-        amount: true,
-        date: true,
-        description: true,
-        category: {
-          select: {
-            id: true,
-            name: true,
-            type: true,
-            description: true,
-          },
-        },
-      },
+      select: this.transactionSelect,
     })
   }
 
   public async getTransactionById(userId: string, id: string) {
     const transaction = await this.prisma.transaction.findFirst({
       where: { id, userId },
-      select: {
-        id: true,
-        amount: true,
-        date: true,
-        description: true,
-        category: {
-          select: {
-            id: true,
-            name: true,
-            type: true,
-            description: true,
-          },
-        },
-      },
+      select: this.transactionSelect,
     })
 
     if (!transaction) {
-      throw new NotFoundException('Transaction not found')
+      throw new NotFoundException('Transaction not found.')
     }
 
     return transaction
@@ -163,7 +126,7 @@ export class TransactionService {
     })
 
     if (!existingTransaction) {
-      throw new NotFoundException('Transaction not found')
+      throw new NotFoundException('Transaction not found.')
     }
 
     await this.prisma.transaction.delete({ where: { id, userId } })

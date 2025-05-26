@@ -23,7 +23,7 @@ import { SessionGuard } from '../token/guards/session.guard'
 import { UpdateTransaction } from './dto/update-transaction.dto'
 import { CreateTransaction } from './dto/create-transaction.dto'
 import { Authorized } from '../decorators/authorized.decorator'
-import { GetTransactionsQueryDto } from './dto/get-transactions.query.dto'
+import { GetTransactionsQuery } from './dto/get-transactions.query.dto'
 
 @Controller('transaction')
 @ApiTags('Transactions')
@@ -61,7 +61,7 @@ export class TransactionController {
   @UseGuards(SessionGuard)
   async getTransactions(
     @Authorized('sub') userId: string,
-    @Query() query: GetTransactionsQueryDto,
+    @Query() query: GetTransactionsQuery,
   ) {
     return await this.transactionService.getTransactions(userId, query)
   }
