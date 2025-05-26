@@ -1,13 +1,15 @@
 import { Type } from 'class-transformer'
-import { IsOptional, IsDateString, IsInt, Min } from 'class-validator'
+import { IsOptional, IsInt, Min, IsDate } from 'class-validator'
 
-export class GetTransactionsQueryDto {
+export class GetTransactionsQuery {
+  @IsDate()
   @IsOptional()
-  @IsDateString()
+  @Type(() => Date)
   from?: string
 
+  @IsDate()
   @IsOptional()
-  @IsDateString()
+  @Type(() => Date)
   to?: string
 
   @IsOptional()

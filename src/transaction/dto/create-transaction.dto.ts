@@ -5,16 +5,17 @@ import {
   IsNotEmpty,
   IsOptional,
   IsString,
+  IsUUID,
 } from 'class-validator'
 
 export class CreateTransaction {
-  @IsString()
+  @IsUUID()
   @IsNotEmpty()
   categoryId: string
 
   @IsDecimal({ decimal_digits: '2' })
   @IsNotEmpty()
-  amount: number
+  amount: string
 
   @IsDate()
   @IsNotEmpty()
