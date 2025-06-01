@@ -1,5 +1,5 @@
 import IORedis from 'ioredis'
-import { INestApplication, ValidationPipe } from '@nestjs/common'
+import { INestApplication } from '@nestjs/common'
 import { App } from 'supertest/types'
 import { PrismaService } from '../../prisma/prisma.service'
 import { Test, TestingModule } from '@nestjs/testing'
@@ -11,7 +11,7 @@ import { LoginDto } from '../dto/login.dto'
 import { TokenService } from '../../token/token.service'
 import { JwtService } from '@nestjs/jwt'
 import { TokenPayload } from '../../types/auth'
-import * as cookieParser from 'cookie-parser'
+import { setupApp } from '../../setup-app'
 
 const registerDto: RegisterDto = {
   name: 'testuser',
@@ -40,23 +40,7 @@ describe('Auth controller (e2e)', () => {
 
     app = moduleFixture.createNestApplication()
 
-    const config = app.get(ConfigService)
-    app.use(cookieParser(config.getOrThrow<string>('COOKIES_SECRET')))
-
-    app.useGlobalPipes(
-      new ValidationPipe({
-        transform: true,
-        whitelist: true,
-        forbidNonWhitelisted: true,
-        forbidUnknownValues: true,
-      }),
-    )
-
-    app.enableCors({
-      origin: config.getOrThrow<string>('ALLOWED_ORIGIN'),
-      credentials: true,
-      exposedHeaders: ['Set-Cookie'],
-    })
+    setupApp(app)
 
     await app.init()
 
@@ -140,10 +124,11 @@ describe('Auth controller (e2e)', () => {
       .send(loginDto)
       .expect(200)
 
-    const { response: loginResponse, accessToken } = await verifyAuth(
-      response,
-      loginDto,
-    )
+    const {
+      response: loginResponse,
+      accessToken,
+      refreshToken,
+    } = await verifyAuth(response, loginDto)
 
     const logoutResponse = await request(app.getHttpServer())
       .post('/auth/logout')
@@ -158,6 +143,11 @@ describe('Auth controller (e2e)', () => {
 
     expect(refreshCookie).toContain('Expires=Thu, 01 Jan 1970')
     expect(refreshCookie).toContain('HttpOnly')
+
+    const refreshValue = await redis.get(
+      tokenService.getRedisKey(refreshToken!),
+    )
+    expect(refreshValue).toBeNull()
   })
 
   const verifyAuth = async (
@@ -206,6 +196,9 @@ describe('Auth controller (e2e)', () => {
     )
 
     expect(isValidRefresh).toBe(true)
+
+    const refreshValue = await redis.get(tokenService.getRedisKey(user!.id))
+    expect(refreshValue).toBeTruthy()
 
     return { response, refreshToken, accessToken }
   }
