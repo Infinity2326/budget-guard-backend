@@ -8,20 +8,20 @@ const incomeId = process.env.DEFAULT_INCOME_ID!
 const expenseId = process.env.DEFAULT_EXPENSE_ID!
 
 async function main() {
-  await prisma.category.create({
-    data: {
-      id: incomeId,
-      name: 'Default Income',
-      type: 'INCOME',
-    },
-  })
-
-  await prisma.category.create({
-    data: {
-      id: expenseId,
-      name: 'Default Expense',
-      type: 'EXPENSE',
-    },
+  await prisma.category.createMany({
+    data: [
+      {
+        id: incomeId,
+        name: 'Default Income',
+        type: 'INCOME',
+      },
+      {
+        id: expenseId,
+        name: 'Default Expense',
+        type: 'EXPENSE',
+      },
+    ],
+    skipDuplicates: true,
   })
 }
 
