@@ -29,7 +29,7 @@ export class TransactionService {
   }
 
   public async createTransaction(userId: string, data: CreateTransaction) {
-    const exsisting = await this.prisma.category.findFirst({
+    const existing = await this.prisma.category.findFirst({
       where: {
         id: data.categoryId,
         OR: [{ userId }, { userId: null }],
@@ -37,7 +37,7 @@ export class TransactionService {
       select: { userId: true },
     })
 
-    if (!exsisting) {
+    if (!existing) {
       throw new ForbiddenException('You dont have access to this category.')
     }
 
@@ -53,7 +53,7 @@ export class TransactionService {
   public async updateTransaction(userId: string, dto: UpdateTransaction) {
     const { id, ...data } = dto
 
-    const exsisting = await this.prisma.transaction.findFirst({
+    const existing = await this.prisma.transaction.findFirst({
       where: {
         id,
         userId,
@@ -61,7 +61,7 @@ export class TransactionService {
       select: { userId: true },
     })
 
-    if (!exsisting || exsisting.userId !== userId) {
+    if (!existing || existing.userId !== userId) {
       throw new ForbiddenException('You dont have access to this transaction.')
     }
 
