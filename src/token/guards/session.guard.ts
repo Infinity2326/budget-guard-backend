@@ -25,7 +25,9 @@ export class SessionGuard implements CanActivate {
     const refreshToken = request.cookies?.['refresh_token'] as string
 
     if (!accessToken || !refreshToken) {
-      throw new UnauthorizedException('No access or refresh token provided.')
+      throw new UnauthorizedException(
+        `No ${!refreshToken && !accessToken ? 'access and refresh' : ''}${!accessToken ? 'access' : 'refresh'} token provided.`,
+      )
     }
 
     let userId: string

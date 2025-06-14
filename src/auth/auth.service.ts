@@ -79,14 +79,14 @@ export class AuthService {
       throw new UnauthorizedException('Invalid refresh token.')
     }
 
-    const accessToken = await this.tokenService.generateAccessToken(userId)
+    const newAccessToken = await this.tokenService.generateAccessToken(userId)
 
     const newRefreshToken = await this.tokenService.rotateRefreshToken(
       userId,
       oldRefreshToken,
     )
 
-    return { accessToken, refreshToken: newRefreshToken }
+    return { newAccessToken, newRefreshToken }
   }
 
   public async validateUser(email: string, password: string) {

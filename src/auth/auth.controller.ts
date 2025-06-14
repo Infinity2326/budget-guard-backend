@@ -65,7 +65,7 @@ export class AuthController {
   }
 
   @Post('logout')
-  @ApiNoContentResponse({ example: { message: 'Logged out successfully' } })
+  @ApiNoContentResponse()
   @HttpCode(HttpStatus.NO_CONTENT)
   async logout(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
     const refreshToken: string | undefined = req.cookies[
@@ -96,20 +96,26 @@ export class AuthController {
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const [, token] = req.headers.authorization?.split(' ') ?? []
+    const [, oldAccessToken] = req.headers.authorization?.split(' ') ?? []
 
-    const refreshToken = req.cookies['refresh_token'] as string
+    const oldRefreshToken = req.cookies['refresh_token'] as string
 
-    if (!refreshToken || !token) {
-      throw new UnauthorizedException('No refresh token.')
+    if (!oldAccessToken || !oldRefreshToken) {
+      throw new UnauthorizedException(
+        `No ${!oldRefreshToken && !oldAccessToken ? 'access and refresh' : !oldAccessToken ? 'access' : 'refresh'} token provided.`,
+      )
     }
 
-    const userId = await this.tokenService.getUserIdFromAccessToken(token)
+    const userId =
+      await this.tokenService.getUserIdFromAccessToken(oldAccessToken)
 
-    const { accessToken, refreshToken: newRefreshToken } =
-      await this.authService.refresh(userId, refreshToken)
+    const { newAccessToken, newRefreshToken } = await this.authService.refresh(
+      userId,
+      oldRefreshToken,
+    )
 
     res.cookie('refresh_token', newRefreshToken, this.cookieOptions)
-    res.json({ access_token: accessToken })
+
+    res.json({ access_token: newAccessToken })
   }
 }
