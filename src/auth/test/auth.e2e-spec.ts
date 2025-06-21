@@ -118,7 +118,7 @@ describe('Auth controller (e2e)', () => {
     expect(oldPayload.jti).not.toBe(newPayload.jti)
   })
 
-  it('POST /auth/logout - should remove access token & refresh token & return message', async () => {
+  it('POST /auth/logout - should remove access token & refresh token', async () => {
     const response = await request(app.getHttpServer())
       .post('/auth/login')
       .send(loginDto)

@@ -17,7 +17,7 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "dotenv -e .env.test -- npx prisma db push && jest --config ./test/jest-e2e.json",    
+    "test:e2e": "dotenv -e .env.test -- npx prisma db push && jest --config ./test/jest-e2e.json --runInBand",
     "compose:dev": "docker compose --profile dev up -d",
     "compose:dev:down": "docker compose --profile dev down",
     "compose:test": "docker compose --env-file .env.test --profile test up -d",
