@@ -1,3 +1,4 @@
+import IORedis from 'ioredis'
 import * as request from 'supertest'
 import TestAgent from 'supertest/lib/agent'
 import { App } from 'supertest/types'
@@ -62,6 +63,7 @@ describe('Transaction controller (e2e)', () => {
   let app: INestApplication<App>
   let agent: TestAgent
   let prisma: PrismaService
+  let redis: IORedis
 
   beforeAll(async () => {
     const moduleRef = await Test.createTestingModule({
@@ -71,6 +73,8 @@ describe('Transaction controller (e2e)', () => {
     app = moduleRef.createNestApplication()
     setupApp(app)
     await app.init()
+
+    redis = app.get('REDIS')
 
     prisma = app.get(PrismaService)
     await prisma.category.createMany({
@@ -87,6 +91,9 @@ describe('Transaction controller (e2e)', () => {
     await prisma.transaction.deleteMany()
     await prisma.category.deleteMany()
     await prisma.user.deleteMany()
+
+    await redis.flushdb()
+    await redis.quit()
 
     await app.close()
   })
