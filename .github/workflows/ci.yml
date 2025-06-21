@@ -1,0 +1,75 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+
+jobs:
+  test-and-build:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:17.4
+        env:
+          POSTGRES_DB: testdb
+          POSTGRES_USER: testuser
+          POSTGRES_PASSWORD: testpass
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U testuser"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+      redis:
+        image: redis:7.2.6
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd="redis-cli ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    env:
+      NODE_ENV: test
+
+      # App secrets
+      JWT_SECRET: ${{ secrets.JWT_SECRET }}
+      REFRESH_TOKEN_TTL: ${{ secrets.REFRESH_TOKEN_TTL }}
+      COOKIES_SECRET: ${{ secrets.COOKIES_SECRET }}
+      ALLOWED_ORIGIN: ${{ secrets.ALLOWED_ORIGIN }}
+      DEFAULT_INCOME_ID: ${{ secrets.DEFAULT_INCOME_ID }}
+      DEFAULT_EXPENSE_ID: ${{ secrets.DEFAULT_EXPENSE_ID }}
+
+      # PostgreSQL
+      POSTGRES_DB: testdb
+      POSTGRES_USER: testuser
+      POSTGRES_PASSWORD: testpass
+      POSTGRES_HOST: localhost
+      POSTGRES_PORT: 5432
+
+      POSTGRES_URI: postgres://testuser:testpass@localhost:5432/testdb
+
+      # Redis
+      REDIS_HOST: localhost
+      REDIS_PORT: 6379
+
+      REDIS_URI: redis://localhost:6379
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - run: npm ci
+      - run: npx prisma generate
+      - run: npx prisma db push
+      - run: npm run lint
+      - run: npm run test
+      - run: npm run test:e2e -- --runInBand
+      - run: npm run build
