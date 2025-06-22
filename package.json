@@ -21,7 +21,9 @@
     "compose:dev": "docker compose --profile dev up -d",
     "compose:dev:down": "docker compose --profile dev down",
     "compose:test": "docker compose --env-file .env.test --profile test up -d",
-    "compose:test:down": "docker compose --profile test down"
+    "compose:test:down": "docker compose --profile test down",
+    "compose:prod": "docker-compose -f docker-compose.prod.yml --env-file .env up --build -d",
+    "compose:prod:down": "docker-compose -f docker-compose.prod.yml down"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",
