@@ -9,7 +9,11 @@ import IORedis from 'ioredis'
       provide: 'REDIS',
       inject: [ConfigService],
       useFactory: (config: ConfigService) => {
-        return new IORedis(config.getOrThrow<string>('REDIS_URI'))
+        const password = config.getOrThrow<string>('REDIS_PASSWORD')
+        const host = config.getOrThrow<string>('REDIS_HOST')
+        const port = config.getOrThrow<string>('REDIS_PORT')
+        const redisUri = `redis://:${password}@${host}:${port}`
+        return new IORedis(redisUri)
       },
     },
   ],
