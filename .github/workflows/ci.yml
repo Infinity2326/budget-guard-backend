@@ -58,9 +58,8 @@ jobs:
 
       # Redis
       REDIS_HOST: localhost
+      REDIS_PASSWORD: testpass
       REDIS_PORT: 6379
-
-      REDIS_URI: redis://localhost:6379
 
     steps:
       - uses: actions/checkout@v4
